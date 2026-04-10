@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>leaflet.countries Demo</title>
+  <title>leaflet.countries — Simple Usage</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     html, body, #map { height: 100%; margin: 0; }
@@ -15,73 +15,47 @@
       background: rgba(255,255,255,0.95);
       border: 1px solid #d1d5db;
       border-radius: 8px;
-      padding: 10px;
+      padding: 12px 14px;
       font-family: Segoe UI, Arial, sans-serif;
       font-size: 13px;
+      max-width: 280px;
+    }
+    #panel code {
+      display: block;
+      background: #f3f4f6;
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin-top: 8px;
+      font-size: 12px;
+      white-space: pre;
     }
   </style>
 </head>
 <body>
-  <div id="panel"><strong>leaflet.countries</strong><br/>Real world country boundaries (remote GeoJSON)</div>
   <div id="map"></div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="../vendor/leaflet.regions.js"></script>
   <script src="../src/leaflet.countries.js"></script>
   <script>
-    function neIso2(props) {
-      var a2 = props.ISO_A2 || '';
-      if (a2 === '-99') {
-        var type = props.TYPE || '';
-        if (type === 'Sovereign country' || type === 'Country') a2 = props.ISO_A2_EH || '';
-      }
-      return String(a2).toUpperCase();
-    }
+    var map = L.map('map').setView([48, 8], 5);
 
-    function keepIsoCountryFeatures(geojson) {
-      if (!geojson || !Array.isArray(geojson.features)) return geojson;
-      geojson.features = geojson.features.filter(function (feature) {
-        var props = feature && feature.properties ? feature.properties : {};
-        return /^[A-Z]{2}$/.test(neIso2(props));
-      });
-      return geojson;
-    }
-
-    var map = L.map('map').setView([40, -95], 3);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; CARTO',
-      subdomains: 'abcd'
+      attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
     }).addTo(map);
 
     // Natural Earth 1:110m Admin 0 Countries. Public Domain. https://www.naturalearthdata.com/
-    fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
-      .then(function (r) { return r.json(); })
-      .then(function (geojson) {
-        var filtered = keepIsoCountryFeatures(geojson);
-        L.countriesLayer({
-          geoJson: filtered,
-          featureKey: function (feature) {
-            var props = feature && feature.properties ? feature.properties : {};
-            return neIso2(props);
-          },
-          label: function (feature) {
-            var props = feature && feature.properties ? feature.properties : {};
-            return props.NAME || props.ADMIN || '';
-          },
-          data: {
-            US: { color: '#3b82f6', popupContent: '<b>United States</b><br/>Manual set country color' },
-            CA: { color: '#ef4444', popupContent: '<b>Canada</b><br/>Manual set country color' },
-            MX: { color: '#22c55e', popupContent: '<b>Mexico</b><br/>Manual set country color' },
-            BR: { color: '#f59e0b', popupContent: '<b>Brazil</b><br/>Manual set country color' },
-            IN: { color: '#8b5cf6', popupContent: '<b>India</b><br/>Manual set country color' },
-            ZA: { color: '#06b6d4', popupContent: '<b>South Africa</b><br/>Manual set country color' }
-          },
-          labelMinZoom: 3,
-          labelAbbrBelowZoom: 4
-        }).addTo(map);
-      })
-      .catch(function (err) {
-        console.error('Failed to load Natural Earth countries GeoJSON:', err);
-      });
+    L.countriesLayer({
+      geoJsonUrl: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson',
+      defaultVisible: false,
+      data: {
+        FR: { name: 'France',      color: '#3b82f6', labelLatLng: [46.7, 2.5  ], popupContent: '<b>France</b> More info here' },
+        DE: { name: 'Germany',     color: '#22c55e' },
+        CH: { name: 'Switzerland', color: '#ef4444' }
+      }
+    }).addTo(map);
   </script>
 </body>
 </html>

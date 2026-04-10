@@ -21,7 +21,12 @@
     options: {
       featureKey: function (feature) {
         var props = feature && feature.properties ? feature.properties : {};
-        return toUpperSafe(props.ISO_A2 || props.ISO2 || props.iso2 || props.code || feature.id || '');
+        var a2 = toUpperSafe(props.ISO_A2 || props.ISO2 || props.iso2 || props.code || feature.id || '');
+        // Natural Earth uses "-99" for countries missing ISO_A2; fall back to ISO_A2_EH.
+        if (a2 === '-99' || a2 === '') {
+          a2 = toUpperSafe(props.ISO_A2_EH || '');
+        }
+        return a2;
       },
       labelColor: '#222',
       label: function (feature) {
