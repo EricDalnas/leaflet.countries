@@ -4,8 +4,8 @@ A Leaflet plugin for world country maps with GeoJSON boundaries, ISO-keyed data 
 
 ## Demo Pages
 
-- **[demo/index.html](https://ericdalnas.github.io/leaflet.countries/demo/index.html)** — World map colored by continent using Natural Earth data.
-- **[demo/manual-labels.html](https://ericdalnas.github.io/leaflet.countries/demo/manual-labels.html)** — Manual label placement demo for countries with complex geometries.
+- **[Simple Demo](https://ericdalnas.github.io/leaflet.countries/demo/index.html)** — World map colored by continent using Natural Earth data.
+- **[Manaul label adjustment example](https://ericdalnas.github.io/leaflet.countries/demo/manual-labels.html)** — Manual label placement demo for countries with complex geometries.
 
 ## Browser usage
 
