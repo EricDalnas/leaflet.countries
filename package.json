@@ -1,0 +1,30 @@
+{
+  "name": "leaflet.countries",
+  "version": "0.1.0",
+  "description": "A Leaflet plugin for world country maps with GeoJSON boundaries, ISO-keyed data binding, and interactive labels.",
+  "author": "Eric D",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EricDalnas/leaflet.countries.git"
+  },
+  "bugs": {
+    "url": "https://github.com/EricDalnas/leaflet.countries/issues"
+  },
+  "homepage": "https://github.com/EricDalnas/leaflet.countries#readme",
+  "main": "src/leaflet.countries.js",
+  "files": [
+    "src",
+    "demo",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "npx serve . -l 3000"
+  },
+  "sideEffects": false,
+  "keywords": ["leaflet", "countries", "geojson", "map"],
+  "license": "MIT",
+  "peerDependencies": {
+    "leaflet": ">=1.0.0"
+  }
+}

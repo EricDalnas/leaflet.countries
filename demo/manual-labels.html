@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Label Placement Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../src/leaflet.countries.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 600px;
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        .info {
+            max-width: 800px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            line-height: 1.6;
+        }
+        code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Manual Label Placement Demo</h1>
+    
+    <div class="info">
+        <h2>Feature Overview</h2>
+        <p>
+            This demo shows how to manually place labels for regions/countries using the 
+            <code>labelLatLng</code> property. This is useful for countries with scattered 
+            territories (like Spain) where the default center-based label placement would 
+            place the label over a territory different from the main region.
+        </p>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="info">
+        <h2>How to Use Manual Label Placement</h2>
+        <p>
+            Add a <code>labelLatLng</code> property to your country/region data object. 
+            The property accepts either an array <code>[lat, lng]</code> or an object <code>{lat, lng}</code>:
+        </p>
+        <pre>
+var layer = L.countriesLayer({
+  geoJsonUrl: '...',
+  data: {
+    US: { 
+      color: '#0047ff',
+      labelLatLng: [39.8283, -98.5795]  // Manually place label at Kansas
+    },
+    ES: {
+      color: '#d40000',
+      labelLatLng: { lat: 39.5, lng: -3.7 }  // Manually place label over Spain mainland
+    }
+  }
+}).addTo(map);
+        </pre>
+        <p>
+            <strong>Note:</strong> The label will be placed at the specified coordinates 
+            instead of at the center of the feature's geometry. This allows precise control 
+            over label positioning.
+        </p>
+    </div>
+
+    <script>
+        function neIso2(props) {
+            var a2 = props.ISO_A2 || '';
+            if (a2 === '-99') {
+                var type = props.TYPE || '';
+                if (type === 'Sovereign country' || type === 'Country') a2 = props.ISO_A2_EH || '';
+            }
+            return String(a2).toUpperCase();
+        }
+
+        function keepIsoCountryFeatures(geojson) {
+            if (!geojson || !Array.isArray(geojson.features)) return geojson;
+            geojson.features = geojson.features.filter(function (feature) {
+                var props = feature && feature.properties ? feature.properties : {};
+                return /^[A-Z]{2}$/.test(neIso2(props));
+            });
+            return geojson;
+        }
+
+        var map = L.map('map').setView([40, -10], 4);
+            baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Natural Earth 1:110m Admin 0 Countries. Public Domain. https://www.naturalearthdata.com/
+        fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+            .then(r => r.json())
+            .then(geojson => {
+                var filteredGeojson = keepIsoCountryFeatures(geojson);
+                var layer = L.countriesLayer({
+                    geoJson: filteredGeojson,
+                    featureKey: function (feature) {
+                        var props = feature && feature.properties ? feature.properties : {};
+                        return neIso2(props);
+                    },
+                    label: function (feature) {
+                        var props = feature && feature.properties ? feature.properties : {};
+                        return props.NAME || props.ADMIN || '';
+                    },
+                    color: '#8b9dc3',
+                    data: {
+                        // Spain: Manually place label over mainland instead of center
+                        ES: {
+                            color: '#ff9500',
+                            labelLatLng: [39.5, -3.7],
+                            popupContent: '<b>Spain</b><p>Label is manually placed over the Iberian mainland.</p>'
+                        },
+                        // United States: Manually place label at geographic center
+                        US: {
+                            color: '#0047ff',
+                            labelLatLng: [39.8283, -98.5795],
+                            popupContent: '<b>United States</b><p>Label is manually placed at geographic center.</p>'
+                        },
+                        // France: Use default centered label
+                        FR: {
+                            color: '#3b82f6',
+                            popupContent: '<b>France</b><p>This country uses default centered label placement.</p>'
+                        }
+                    }
+                }).addTo(map);
+
+                // Listen for rendered event
+                layer.on('rendered', function (e) {
+                    console.log('Layer rendered with ' + e.layerCount + ' layers');
+                });
+            })
+            .catch(err => console.error('Failed to load GeoJSON:', err));
+    </script>
+</body>
+</html>
