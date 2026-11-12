@@ -1,36 +1,56 @@
 # leaflet.countries
 
-A Leaflet plugin for world country maps with GeoJSON boundaries, ISO-keyed data binding, and interactive labels.
+A Leaflet plugin for highlighting countries and controlling their labels on a GeoJSON map.
 
 ## Demo Pages
 
 - **[Simple Demo](https://ericdalnas.github.io/leaflet.countries/demo/index.html)** — World map colored by continent using Natural Earth data.
-- **[Manaul label adjustment example](https://ericdalnas.github.io/leaflet.countries/demo/manual-labels.html)** — Manual label placement demo for countries with complex geometries.
+- **[Manual label adjustment example](https://ericdalnas.github.io/leaflet.countries/demo/manual-labels.html)** — Manual label placement demo for countries with complex geometries.
 
 ## Browser usage
 
 ```html
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="./vendor/leaflet.regions.js"></script>
 <script src="./src/leaflet.countries.js"></script>
 ```
 
-## Usage
+## Quick Start
+
+Create the layer with transparent fills to leave countries unhighlighted. Country borders and labels remain visible. This example assumes you have already created a Leaflet map named `map`.
 
 ```js
-var layer = L.countriesLayer({
+var countries = L.countriesLayer({
   geoJsonUrl: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson',
-  featureKey: function (feature) {
-    return String(feature.properties.ISO_A2 || '').toUpperCase();
-  },
-  label: function (feature) {
-    return feature.properties.NAME || feature.properties.ADMIN || '';
-  },
-  data: {
-    US: { color: '#0047ff', popupContent: '<b>United States</b>' },
-    CA: { color: '#d40000', popupContent: '<b>Canada</b>' }
-  }
+  color: 'transparent'
 }).addTo(map);
+```
+
+### Highlight a Country
+
+Use `setCountry` to turn a country's fill on and off. Country keys use ISO alpha-2 codes.
+
+```js
+countries.setCountry('US', { color: '#3778c2' }); // Highlight the United States
+countries.setCountry('US', { color: null });      // Remove its highlight
+```
+
+### Show or Hide Labels
+
+Labels are shown by default. Set the label to an empty string for every feature to hide them, then restore a label function to show them again.
+
+```js
+countries.setOptions({
+  label: function () { return ''; }
+});
+
+countries.setOptions({
+  label: function (feature) {
+    var props = feature.properties || {};
+    return props.name || props.ADMIN || '';
+  }
+});
 ```
 
 ## Data Properties
